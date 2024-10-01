@@ -3,10 +3,13 @@ import re
 import json
 import chromadb
 import google.generativeai as genai
-
-#Load your environment variables if needed
+from flask import Flask, request, jsonify
 from dotenv import load_dotenv
+
 load_dotenv()
+
+# Initialize Flask app
+app = Flask(__name__)
 
 # Initialize ChromaDB client
 chroma_client = chromadb.Client()
@@ -103,16 +106,28 @@ def query_and_generate(query_text):
     except Exception as e:
         return str(e)
 
-def main():
-    json_file_path = 'output.json'  # Path to your output JSON file
+@app.route('/process', methods=['POST'])
+def process_files():
+    json_file_path = request.json.get('json_file_path', 'output.json')  # Default to output.json if not provided
     process_json_file(json_file_path)
+    return jsonify({"message": "Processing complete."}), 200
 
-    while True:
-        query = input("Enter your query (or 'quit' to exit): ")
-        if query.lower() == 'quit':
-            break
-        answer = query_and_generate(query)
-        print("Assistant:", answer)
+@app.route('/query', methods=['POST'])
+def handle_query():
+    data = request.json
+    query_text = data.get('query')
+    
+    if not query_text:
+        return jsonify({"error": "No query provided"}), 400
+    
+    result = query_and_generate(query_text)
+    return jsonify({"answer": result}), 200
+
+def main():
+    # Process existing files initially (if needed)
+    # process_json_file('output.json')  # Uncomment to process immediately on startup
+
+    app.run(debug=True)
 
 if __name__ == "__main__":
     main()
