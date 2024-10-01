@@ -1,0 +1,18 @@
+# Ignore everything
+*
+
+# But don't ignore these specific files
+!extracter.py
+!genai_rag.py
+!output.json
+
+# Don't ignore .gitignore itself
+!.gitignore
+
+# Ignore all directories
+*/
+
+# But allow files with the specified names even if they're in subdirectories
+!**/extracter.py
+!**/genai_rag.py
+!**/output.json
