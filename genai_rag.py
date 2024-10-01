@@ -1,5 +1,4 @@
 import os
-import re
 import json
 import chromadb
 import google.generativeai as genai
@@ -73,61 +72,60 @@ def process_json_file(json_file_path):
         print(f"Error processing {json_file_path}: {str(e)}")
 
 def query_and_generate(query_text):
-    """Query the ChromaDB collection and generate a response."""
-    results = collection.query(
-        query_texts=[query_text],
-        n_results=5
-    )
-    
-    distances = results["distances"][0]
-    distance_threshold = 1.5
+   """Query the ChromaDB collection and generate a response."""
+   results = collection.query(
+       query_texts=[query_text],
+       n_results=5
+   )
+   
+   distances = results["distances"][0]
+   distance_threshold = 1.5
 
-    relevant_docs = [doc for i, doc in enumerate(results["documents"][0]) if distances[i] < distance_threshold]
-    
-    if not relevant_docs:
-        context = "The query does not closely match any specific file content."
-    else:
-        context = "\n\n".join(relevant_docs)
+   relevant_docs = [doc for i, doc in enumerate(results["documents"][0]) if distances[i] < distance_threshold]
+   
+   if not relevant_docs:
+       context = "The query does not closely match any specific file content."
+   else:
+       context = "\n\n".join(relevant_docs)
 
-    prompt = f"""
-    You are a highly knowledgeable AI assistant. Your task is to provide a concise response to the user's question based on the given context.
-    
-    Context from knowledge base:
-    {context}
+   # Modified prompt to include file type context
+   prompt = f"""
+   You are an AI assistant knowledgeable about various programming languages and configurations.
+   The following context includes code snippets and configuration files that may relate to your question.
+   
+   Context from knowledge base (including programming language details):
+   {context}
 
-    Human: {query_text}
+   Human: {query_text}
 
-    Assistant:
-    """
-    
-    try:
-        response = model.generate_content(prompt)
-        return response.text
-    except Exception as e:
-        return str(e)
+   Assistant:
+   """
+   
+   try:
+       response = model.generate_content(prompt)
+       return response.text
+   except Exception as e:
+       return str(e)
 
 @app.route('/process', methods=['POST'])
 def process_files():
-    json_file_path = request.json.get('json_file_path', 'output.json')  # Default to output.json if not provided
-    process_json_file(json_file_path)
-    return jsonify({"message": "Processing complete."}), 200
+   json_file_path = request.json.get('json_file_path', 'output.json')  # Default to output.json if not provided
+   process_json_file(json_file_path)
+   return jsonify({"message": "Processing complete."}), 200
 
 @app.route('/query', methods=['POST'])
 def handle_query():
-    data = request.json
-    query_text = data.get('query')
-    
-    if not query_text:
-        return jsonify({"error": "No query provided"}), 400
-    
-    result = query_and_generate(query_text)
-    return jsonify({"answer": result}), 200
+   data = request.json
+   query_text = data.get('query')
+   
+   if not query_text:
+       return jsonify({"error": "No query provided"}), 400
+   
+   result = query_and_generate(query_text)
+   return jsonify({"answer": result}), 200
 
 def main():
-    # Process existing files initially (if needed)
-    # process_json_file('output.json')  # Uncomment to process immediately on startup
-
-    app.run(debug=True)
+   app.run(debug=True)
 
 if __name__ == "__main__":
-    main()
+   main()
