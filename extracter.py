@@ -1,6 +1,10 @@
 import requests
 import base64
 import json
+import os
+
+from dotenv import load_dotenv
+load_dotenv()
 
 # Function to get branches from the repository
 def get_branches(owner, repo, token):
@@ -84,5 +88,6 @@ def automate_github_data_collection(git_url, token):
 
 # Example usage
 git_url = "https://github.com/MachoMaheen/windowsGPT.git"
-personal_access_token = "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"  # Replace with your actual token
+personal_access_token =os.getenv("GITHUB_TOKEN")
+  # Replace with your actual token
 automate_github_data_collection(git_url, personal_access_token)
