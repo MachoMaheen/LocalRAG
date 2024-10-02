@@ -5,13 +5,14 @@
 !extracter.py
 !genai_rag.py
 !output.json
+!prompt_result.txt
 
 # Don't ignore .gitignore itself
 !.gitignore
 
 # Ignore all directories
 */
-
+    
 # But allow files with the specified names even if they're in subdirectories
 !**/extracter.py
 !**/genai_rag.py
